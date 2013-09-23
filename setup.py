@@ -10,7 +10,9 @@ try:
 finally:
     readme.close()
 
-required_pkgs = []
+required_pkgs = [
+    'coverage',
+]
 if sys.version_info < (2, 7):
     required_pkgs.append('argparse')
 
@@ -26,7 +28,12 @@ setup(
         'duvet',
     ],
     install_requires=required_pkgs,
-    scripts=['scripts/duvet'],
+    scripts=[],
+    entry_points={
+        'console_scripts': [
+            'duvet = duvet.__main__:main',
+        ]
+    },
     license='New BSD',
     classifiers=[
         'Development Status :: 4 - Beta',
