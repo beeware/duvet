@@ -12,6 +12,7 @@ finally:
 
 required_pkgs = [
     'coverage',
+    'tkreadonly',
 ]
 if sys.version_info < (2, 7):
     required_pkgs.append('argparse')
