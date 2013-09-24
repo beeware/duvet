@@ -20,7 +20,7 @@ if sys.version_info < (2, 7):
 setup(
     name='duvet',
     version=VERSION,
-    description='GUI tool for visualizing code coverage results.',
+    description='A GUI tool for visualizing code coverage results.',
     long_description=long_description,
     author='Russell Keith-Magee',
     author_email='russell@keith-magee.com',
