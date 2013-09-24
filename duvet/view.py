@@ -310,6 +310,11 @@ class MainWindow(object):
                                 self.file_tree.set(node, 'coverage', '')
                                 self.file_tree.item(node, tags=['file', 'code'])
 
+                    current_file = self.code._filename
+                    if current_file:
+                        self.code._filename = None
+                        self.show_file(current_file)
+
                     loaded = True
             except IOError:
                 retry = tkMessageBox.askretrycancel(
