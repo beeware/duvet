@@ -113,9 +113,9 @@ class FileView(Treeview):
         return node.replace('\\', '/')
 
     def selection_set(self, node):
-        """Node names on the breakpoint tree are the filename.
+        """Node names on the file tree are the filename.
 
         On Windows, this requires escaping, because backslashes
-        in filenames cause problems with Tk.
+        in object IDs filenames cause problems with Tk.
         """
         Treeview.selection_set(self, self._nodify(node))
