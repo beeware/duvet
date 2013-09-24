@@ -2,7 +2,7 @@ include README.rst
 include AUTHORS
 include LICENSE
 include requirements*.txt
-recursive-include {{ cookiecutter.repo_name }} *.py
+recursive-include duvet *.py
 recursive-include docs *.bat
 recursive-include docs *.py
 recursive-include docs *.rst
