@@ -24,16 +24,16 @@ source file tree, with a color indicating how good the coverage is (red for bad
 coverage, green for perfect coverage). If you select a filename in the tree, the
 contents of that file will be displayed, with the missed lines highlighted.
 
-Problems under Ubuntu/Debian
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Problems under Ubuntu
+~~~~~~~~~~~~~~~~~~~~~
 
-Deian and Ubuntu's packaging of Python omits the ``idlelib`` library from it's
+Ubuntu's packaging of Python omits the ``idlelib`` library from it's
 base packge. If you're using Python 2.7 on Ubuntu 13.04, you can install
 ``idlelib`` by running::
 
     $ sudo apt-get install idle-python2.7
 
-For other versions of Python, Ubuntu and Debian, you'll need to adjust this as
+For other versions of Python and Ubuntu, you'll need to adjust this as
 appropriate.
 
 Problems under Windows
