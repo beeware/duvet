@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 """A module containing a visual representation of the connection
 
 This is the "View" of the MVC world.
@@ -55,7 +56,7 @@ class MainWindow(object):
         self.filename_normalizer = filename_normalizer(self.base_path)
 
         # Set up dummy coverage data
-        self.coverage_data = {'lines': {}}
+        self.coverage_data = {'lines': {}, 'total_coverage': None}
 
         # Root window
         self.root = root
@@ -127,7 +128,13 @@ class MainWindow(object):
         self.refresh_button = Button(self.toolbar, text='Refresh', command=self.cmd_refresh)
         self.refresh_button.grid(column=0, row=0)
 
+        # Coverage summary for currently selected file.
+        self.coverage_total_summary = StringVar()
+        self.coverage_total_summary_label = Label(self.toolbar, textvariable=self.coverage_total_summary, anchor=E, padding=(5, 0, 5, 0), font=('Helvetica','20'))
+        self.coverage_total_summary_label.grid(column=1, row=0, sticky=(W, E))
+
         self.toolbar.columnconfigure(0, weight=0)
+        self.toolbar.columnconfigure(1, weight=1)
         self.toolbar.rowconfigure(0, weight=0)
 
     def _setup_main_content(self):
@@ -202,10 +209,10 @@ class MainWindow(object):
         self.statusbar.grid(column=0, row=2, sticky=(W, E))
 
         # Coverage summary for currently selected file.
-        self.coverage_summary = StringVar()
-        self.coverage_summary_label = Label(self.statusbar, textvariable=self.coverage_summary)
-        self.coverage_summary_label.grid(column=0, row=0, sticky=(W, E))
-        self.coverage_summary.set('No file selected')
+        self.coverage_file_summary = StringVar()
+        self.coverage_file_summary_label = Label(self.statusbar, textvariable=self.coverage_file_summary)
+        self.coverage_file_summary_label.grid(column=0, row=0, sticky=(W, E))
+        self.coverage_file_summary.set('No file selected')
 
         # Main window resize handle
         self.grip = Sizegrip(self.statusbar)
@@ -246,7 +253,7 @@ class MainWindow(object):
 
             self.code.highlight_missing(missing)
 
-            self.coverage_summary.set('%s/%s lines executed (%s missing)' % (n_executed, n_executed + n_missing, n_missing))
+            self.coverage_file_summary.set('%s/%s lines executed' % (n_executed, n_executed + n_missing))
 
         self.code.line = line
 
@@ -255,6 +262,7 @@ class MainWindow(object):
         # Store the old list of files that have coverage data.
         # We do this so we can identify stale data on the tree.
         old_files = set(self.coverage_data['lines'].keys())
+        old_total_coverage = self.coverage_data['total_coverage']
 
         loaded = False
         retry = True
@@ -265,6 +273,8 @@ class MainWindow(object):
                     self.coverage_data = pickle.load(datafile)
                     self.coverage_data['missing'] = {}
 
+                    n_total_executed = 0
+                    n_total_missing = 0
                     # Update the coverage display of every file mentioned in the file.
                     for filename, executed in self.coverage_data['lines'].items():
                         node = self.file_tree._nodify(filename)
@@ -277,11 +287,14 @@ class MainWindow(object):
                             exec1 = parser.first_lines(executed)
                             missing = sorted(set(statements) - set(exec1))
                             self.coverage_data['missing'][filename] = missing
-                            n_executed = float(len(executed))
-                            n_missing = float(len(missing))
+                            n_executed = len(executed)
+                            n_missing = len(missing)
+
+                            n_total_executed = n_total_executed + n_executed
+                            n_total_missing = n_total_missing + n_missing
 
                             # Update the column summary
-                            coverage = round(n_executed / (n_executed + n_missing) * 100, 1)
+                            coverage = round(float(n_executed) / (float(n_executed) + float(n_missing)) * 100, 1)
                             self.file_tree.set(node, 'coverage', coverage)
 
                             # Set the color of the tree node based on coverage
@@ -310,6 +323,34 @@ class MainWindow(object):
                                 self.file_tree.set(node, 'coverage', '')
                                 self.file_tree.item(node, tags=['file', 'code'])
 
+                    # Compute the overall coverage
+                    total_coverage = round(float(n_total_executed) / (float(n_total_executed) + float(n_total_missing)) * 100, 1)
+                    self.coverage_data['total_coverage'] = total_coverage
+
+                    coverage_text = u'%.1f%%' % self.coverage_data['total_coverage'],
+
+                    # Update the text with up/down arrows to reflect change
+                    if old_total_coverage is not None:
+                        if total_coverage > old_total_coverage:
+                            coverage_text = coverage_text + u' ⬆'
+                        elif total_coverage < old_total_coverage:
+                            coverage_text = coverage_text + u' ⬇'
+
+                    self.coverage_total_summary.set(coverage_text)
+
+                    # Set the color based on coverage level.
+                    if coverage < 70.0:
+                        self.coverage_total_summary_label.configure(foreground='red')
+                    elif coverage < 80.0:
+                        self.coverage_total_summary_label.configure(foreground='orange')
+                    elif coverage < 90.0:
+                        self.coverage_total_summary_label.configure(foreground='blue')
+                    elif coverage < 99.9:
+                        self.coverage_total_summary_label.configure(foreground='cyan')
+                    else:
+                        self.coverage_total_summary_label.configure(foreground='green')
+
+                    # Refresh the file display
                     current_file = self.code._filename
                     if current_file:
                         self.code._filename = None
