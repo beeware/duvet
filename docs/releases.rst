@@ -1,7 +1,7 @@
 Release History
 ===============
 
-0.1.1 - In development
+0.1.1 - 26 September 2013
 -------------------------
 
 * Added overall coverage display and tracking.
