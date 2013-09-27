@@ -14,7 +14,7 @@ import webbrowser
 from coverage.parser import CodeParser
 
 from duvet import VERSION, NUM_VERSION
-from duvet.widgets import CodeView, FileView
+from duvet.widgets import nodify, CodeView, FileView
 
 
 def filename_normalizer(base_path):
@@ -146,8 +146,12 @@ class MainWindow(object):
         self.content = PanedWindow(self.root, orient=HORIZONTAL)
         self.content.grid(column=0, row=1, sticky=(N, S, E, W))
 
-        # Create subregions of the content
-        self._setup_file_tree()
+        # Create the tree/control area on the left frame
+        self._setup_left_frame()
+        self._setup_project_file_tree()
+        self._setup_global_file_tree()
+
+        # Create the output/viewer area on the right frame
         self._setup_code_area()
 
         # Set up weights for the left frame's content
@@ -157,31 +161,67 @@ class MainWindow(object):
         self.content.pane(0, weight=1)
         self.content.pane(1, weight=4)
 
-    def _setup_file_tree(self):
-        self.file_tree_frame = Frame(self.content)
-        self.file_tree_frame.grid(column=0, row=0, sticky=(N, S, E, W))
+    def _setup_left_frame(self):
+        '''
+        The left frame mostly consists of the tree widget
+        '''
 
-        self.file_tree = FileView(self.file_tree_frame, normalizer=self.filename_normalizer, root=self.base_path)
-        self.file_tree.grid(column=0, row=0, sticky=(N, S, E, W))
+        # The left-hand side frame on the main content area
+        # The tabs for the two trees
+        self.tree_notebook = Notebook(self.content, padding=(0, 5, 0, 5))
+        self.content.add(self.tree_notebook)
+
+    def _setup_project_file_tree(self):
+
+        self.project_file_tree_frame = Frame(self.content)
+        self.project_file_tree_frame.grid(column=0, row=0, sticky=(N, S, E, W))
+        self.tree_notebook.add(self.project_file_tree_frame, text='Project')
+
+        self.project_file_tree = FileView(self.project_file_tree_frame, normalizer=self.filename_normalizer, root=self.base_path)
+        self.project_file_tree.grid(column=0, row=0, sticky=(N, S, E, W))
 
         # # The tree's vertical scrollbar
-        self.file_tree_scrollbar = Scrollbar(self.file_tree_frame, orient=VERTICAL)
-        self.file_tree_scrollbar.grid(column=1, row=0, sticky=(N, S))
+        self.project_file_tree_scrollbar = Scrollbar(self.project_file_tree_frame, orient=VERTICAL)
+        self.project_file_tree_scrollbar.grid(column=1, row=0, sticky=(N, S))
 
         # # Tie the scrollbar to the text views, and the text views
         # # to each other.
-        self.file_tree.config(yscrollcommand=self.file_tree_scrollbar.set)
-        self.file_tree_scrollbar.config(command=self.file_tree.yview)
+        self.project_file_tree.config(yscrollcommand=self.project_file_tree_scrollbar.set)
+        self.project_file_tree_scrollbar.config(command=self.project_file_tree.yview)
 
-        # Setup weights for the "file_tree" tree
-        self.file_tree_frame.columnconfigure(0, weight=1)
-        self.file_tree_frame.columnconfigure(1, weight=0)
-        self.file_tree_frame.rowconfigure(0, weight=1)
+        # Setup weights for the "project_file_tree" tree
+        self.project_file_tree_frame.columnconfigure(0, weight=1)
+        self.project_file_tree_frame.columnconfigure(1, weight=0)
+        self.project_file_tree_frame.rowconfigure(0, weight=1)
 
         # Handlers for GUI events
-        self.file_tree.bind('<<TreeviewSelect>>', self.on_file_selected)
+        self.project_file_tree.bind('<<TreeviewSelect>>', self.on_file_selected)
 
-        self.content.add(self.file_tree_frame)
+    def _setup_global_file_tree(self):
+
+        self.global_file_tree_frame = Frame(self.content)
+        self.global_file_tree_frame.grid(column=0, row=0, sticky=(N, S, E, W))
+        self.tree_notebook.add(self.global_file_tree_frame, text='Global')
+
+        self.global_file_tree = FileView(self.global_file_tree_frame, normalizer=self.filename_normalizer)
+        self.global_file_tree.grid(column=0, row=0, sticky=(N, S, E, W))
+
+        # # The tree's vertical scrollbar
+        self.global_file_tree_scrollbar = Scrollbar(self.global_file_tree_frame, orient=VERTICAL)
+        self.global_file_tree_scrollbar.grid(column=1, row=0, sticky=(N, S))
+
+        # # Tie the scrollbar to the text views, and the text views
+        # # to each other.
+        self.global_file_tree.config(yscrollcommand=self.global_file_tree_scrollbar.set)
+        self.global_file_tree_scrollbar.config(command=self.global_file_tree.yview)
+
+        # Setup weights for the "global_file_tree" tree
+        self.global_file_tree_frame.columnconfigure(0, weight=1)
+        self.global_file_tree_frame.columnconfigure(1, weight=0)
+        self.global_file_tree_frame.rowconfigure(0, weight=1)
+
+        # Handlers for GUI events
+        self.global_file_tree.bind('<<TreeviewSelect>>', self.on_file_selected)
 
     def _setup_code_area(self):
         self.code_frame = Frame(self.content)
@@ -277,55 +317,63 @@ class MainWindow(object):
                     n_total_missing = 0
                     # Update the coverage display of every file mentioned in the file.
                     for filename, executed in self.coverage_data['lines'].items():
-                        node = self.file_tree._nodify(filename)
-                        if self.file_tree.exists(node):
-                            # self.file_tree.set(node, 'branch_coverage', str(len(lines)))
+                        node = nodify(filename)
+                        if self.project_file_tree.exists(node):
+                            file_tree = self.project_file_tree
+                        else:
+                            file_tree = self.global_file_tree
+                            dirname, basename = os.path.split(filename)
 
-                            # Compute the coverage percentage
-                            parser = CodeParser(filename=filename)
-                            statements, excluded = parser.parse_source()
-                            exec1 = parser.first_lines(executed)
-                            missing = sorted(set(statements) - set(exec1))
-                            self.coverage_data['missing'][filename] = missing
-                            n_executed = len(executed)
-                            n_missing = len(missing)
+                        # Make sure the file exists on the tree.
+                        self.file_tree.insert_filename(dirname, basename)
 
-                            n_total_executed = n_total_executed + n_executed
-                            n_total_missing = n_total_missing + n_missing
+                        # file_tree.set(node, 'branch_coverage', str(len(lines)))
 
-                            # Update the column summary
-                            try:
-                                coverage = round(float(n_executed) / (float(n_executed) + float(n_missing)) * 100, 1)
-                            except ZeroDivisionError:
-                                # If no lines were executed or missing, report as 0.0% coverage.
-                                coverage = 0.0
-                            self.file_tree.set(node, 'coverage', coverage)
+                        # Compute the coverage percentage
+                        parser = CodeParser(filename=filename)
+                        statements, excluded = parser.parse_source()
+                        exec1 = parser.first_lines(executed)
+                        missing = sorted(set(statements) - set(exec1))
+                        self.coverage_data['missing'][filename] = missing
+                        n_executed = len(executed)
+                        n_missing = len(missing)
 
-                            # Set the color of the tree node based on coverage
-                            if coverage < 70.0:
-                                self.file_tree.item(node, tags=['file', 'code', 'bad'])
-                            elif coverage < 80.0:
-                                self.file_tree.item(node, tags=['file', 'code', 'poor'])
-                            elif coverage < 90.0:
-                                self.file_tree.item(node, tags=['file', 'code', 'ok'])
-                            elif coverage < 99.9:
-                                self.file_tree.item(node, tags=['file', 'code', 'good'])
-                            else:
-                                self.file_tree.item(node, tags=['file', 'code', 'perfect'])
+                        n_total_executed = n_total_executed + n_executed
+                        n_total_missing = n_total_missing + n_missing
 
-                            # We've updated the file, so we know it isn't stale.
-                            try:
-                                old_files.remove(filename)
-                            except KeyError:
-                                # File wasn't loaded before; ignore this.
-                                pass
+                        # Update the column summary
+                        try:
+                            coverage = round(float(n_executed) / (float(n_executed) + float(n_missing)) * 100, 1)
+                        except ZeroDivisionError:
+                            # If no lines were executed or missing, report as 0.0% coverage.
+                            coverage = 0.0
+                        file_tree.set(node, 'coverage', coverage)
+
+                        # Set the color of the tree node based on coverage
+                        if coverage < 70.0:
+                            file_tree.item(node, tags=['file', 'code', 'bad'])
+                        elif coverage < 80.0:
+                            file_tree.item(node, tags=['file', 'code', 'poor'])
+                        elif coverage < 90.0:
+                            file_tree.item(node, tags=['file', 'code', 'ok'])
+                        elif coverage < 99.9:
+                            file_tree.item(node, tags=['file', 'code', 'good'])
+                        else:
+                            file_tree.item(node, tags=['file', 'code', 'perfect'])
+
+                        # We've updated the file, so we know it isn't stale.
+                        try:
+                            old_files.remove(filename)
+                        except KeyError:
+                            # File wasn't loaded before; ignore this.
+                            pass
 
                         # Clear out any stale coverage data
                         for filename in old_files:
-                            node = self.file_tree._nodify(filename)
-                            if self.file_tree.exists(node):
-                                self.file_tree.set(node, 'coverage', '')
-                                self.file_tree.item(node, tags=['file', 'code'])
+                            node = nodify(filename)
+                            if file_tree.exists(node):
+                                file_tree.set(node, 'coverage', '')
+                                file_tree.item(node, tags=['file', 'code'])
 
                     # Compute the overall coverage
                     try:
@@ -365,7 +413,7 @@ class MainWindow(object):
                         self.show_file(current_file)
 
                     loaded = True
-            except IOError:
+            except (IOError, EOFError):
                 retry = tkMessageBox.askretrycancel(
                     message="Couldn't find coverage data file. Have you generated coverage data? Is the .coverage in your current working directory",
                     title='No coverage data found'

@@ -4,6 +4,11 @@ from ttk import *
 from tkreadonly import ReadOnlyCode
 
 
+def nodify(node):
+    "Escape any problem characters in a node name"
+    return node.replace('\\', '/')
+
+
 class CodeView(ReadOnlyCode):
     def __init__(self, *args, **kwargs):
         ReadOnlyCode.__init__(self, *args, **kwargs)
@@ -20,7 +25,7 @@ class FileView(Treeview):
         # Only a single stack frame can be selected at a time.
         kwargs['selectmode'] = 'browse'
         self.normalizer = kwargs.pop('normalizer')
-        self.root = kwargs.pop('root')
+        self.root = kwargs.pop('root', None)
         Treeview.__init__(self, *args, **kwargs)
 
         # self['columns'] = ('coverage', 'branch_coverage')
@@ -42,7 +47,8 @@ class FileView(Treeview):
         self.tag_configure('non_code', foreground='gray')
 
         # Populate the file view
-        os.path.walk(self.root, self._visitor, None)
+        if self.root:
+            os.path.walk(self.root, self._visitor, None)
 
     def _visitor(self, data, dirname, filesindir):
         prune = []
@@ -67,21 +73,35 @@ class FileView(Treeview):
 
     def insert_dirname(self, dirname):
         "Ensure that a specific directory exists in the breakpoint tree"
-        if not self.exists(dirname):
-            # First, establish the index at which to insert this child.
+        if not self.exists(nodify(dirname)):
+            nodename = nodify(dirname)
+            parent, child = os.path.split(dirname)
+            if self.root:
+                # We're displaying a subtree.
+                if nodename == nodify(self.root):
+                    # If this is the CWD, display at the root of the tree.
+                    path = nodify(child)
+                    base = ''
+                else:
+                    self.insert_dirname(parent)
+                    base = nodify(parent)
+                    path = nodify(child)
+            else:
+                if parent == '/':
+                    path = nodify(child)
+                    base = ''
+                else:
+                    self.insert_dirname(parent)
+                    base = nodify(parent)
+                    path = nodify(child)
+
+            # Establish the index at which to insert this child.
             # Do this by getting a list of children, sorting the list by name
             # and then finding how many would sort less than the label for
             # this node.
-            files = sorted(self.get_children(''), reverse=False)
+            files = sorted(self.get_children(base), reverse=False)
             index = len([item for item in files if item > dirname])
 
-            nodename = self._nodify(dirname)
-            if nodename == self._nodify(self.root):
-                # If this is the CWD, display at the root of the tree.
-                base, path = nodename.rsplit('/', 1)
-                base = ''
-            else:
-                base, path = nodename.rsplit('/', 1)
             # Now insert a new node at the index that was found.
             self.insert(
                 base, index, nodename,
@@ -90,27 +110,39 @@ class FileView(Treeview):
                 tags=['directory']
             )
 
-    def insert_filename(self, dirname, filename, ext):
+    def insert_filename(self, dirname, filename, ext='.py'):
         "Ensure that a specific filename exists in the breakpoint tree"
-        if not self.exists(filename):
-            # First, establish the index at which to insert this child.
+        full_filename = os.path.join(dirname, filename)
+        if not self.exists(nodify(full_filename)):
+            # If self.root is defined, we're only displaying files under that root.
+            # If the normalized version of the filename is the same as the
+            # filename, then the file *isn't* under the root. Don't bother trying
+            # to add the file.
+            # Alternatively, if self.root is *not* defined, *only* add the file if
+            # if isn't under the project root.
+            if full_filename == self.normalizer(full_filename):
+                if self.root:
+                    return
+                self.insert_dirname(dirname)
+            else:
+                if self.root is None:
+                    return
+
+            # Establish the index at which to insert this child.
             # Do this by getting a list of children, sorting the list by name
             # and then finding how many would sort less than the label for
             # this node.
-            files = sorted(self.get_children(''), reverse=False)
+            files = sorted(self.get_children(nodify(dirname)), reverse=False)
             index = len([item for item in files if item > filename])
 
             # Now insert a new node at the index that was found.
             self.insert(
-                self._nodify(dirname), index, self._nodify(os.path.join(dirname, filename)),
-                text=self.normalizer(filename),
+                nodify(dirname), index, nodify(os.path.join(dirname, filename)),
+                text=filename,
                 open=True,
                 tags=['file'] + ['code'] if ext == '.py' else ['non_code']
             )
 
-    def _nodify(self, node):
-        "Escape any problem characters in a node name"
-        return node.replace('\\', '/')
 
     def selection_set(self, node):
         """Node names on the file tree are the filename.
@@ -118,4 +150,4 @@ class FileView(Treeview):
         On Windows, this requires escaping, because backslashes
         in object IDs filenames cause problems with Tk.
         """
-        Treeview.selection_set(self, self._nodify(node))
+        Treeview.selection_set(self, nodify(node))
