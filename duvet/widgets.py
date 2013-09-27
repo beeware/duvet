@@ -87,8 +87,9 @@ class FileView(Treeview):
                     base = nodify(parent)
                     path = nodify(child)
             else:
-                if parent == '/':
-                    path = nodify(child)
+                # Check for the "root" on both unix and Windows
+                if child == '':
+                    path = nodify(parent)
                     base = ''
                 else:
                     self.insert_dirname(parent)
@@ -100,7 +101,7 @@ class FileView(Treeview):
             # and then finding how many would sort less than the label for
             # this node.
             files = sorted(self.get_children(base), reverse=False)
-            index = len([item for item in files if item > dirname])
+            index = len([item for item in files if item < nodify(dirname)])
 
             # Now insert a new node at the index that was found.
             self.insert(
@@ -133,8 +134,7 @@ class FileView(Treeview):
             # and then finding how many would sort less than the label for
             # this node.
             files = sorted(self.get_children(nodify(dirname)), reverse=False)
-            index = len([item for item in files if item > filename])
-
+            index = len([item for item in files if item < nodify(full_filename)])
             # Now insert a new node at the index that was found.
             self.insert(
                 nodify(dirname), index, nodify(os.path.join(dirname, filename)),

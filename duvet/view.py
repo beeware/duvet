@@ -317,15 +317,19 @@ class MainWindow(object):
                     n_total_missing = 0
                     # Update the coverage display of every file mentioned in the file.
                     for filename, executed in self.coverage_data['lines'].items():
+                        filename = os.path.normcase(filename)
                         node = nodify(filename)
-                        if self.project_file_tree.exists(node):
-                            file_tree = self.project_file_tree
-                        else:
+                        dirname, basename = os.path.split(filename)
+
+                        # If the normalized version of the filename is the same as the
+                        # filename, then the file *isn't* under the project root.
+                        if filename == self.filename_normalizer(filename):
                             file_tree = self.global_file_tree
-                            dirname, basename = os.path.split(filename)
+                        else:
+                            file_tree = self.project_file_tree
 
                         # Make sure the file exists on the tree.
-                        self.file_tree.insert_filename(dirname, basename)
+                        file_tree.insert_filename(dirname, basename)
 
                         # file_tree.set(node, 'branch_coverage', str(len(lines)))
 
