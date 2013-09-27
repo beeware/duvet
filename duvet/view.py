@@ -339,13 +339,13 @@ class MainWindow(object):
                     self.coverage_total_summary.set(coverage_text)
 
                     # Set the color based on coverage level.
-                    if coverage < 70.0:
+                    if total_coverage < 70.0:
                         self.coverage_total_summary_label.configure(foreground='red')
-                    elif coverage < 80.0:
+                    elif total_coverage < 80.0:
                         self.coverage_total_summary_label.configure(foreground='orange')
-                    elif coverage < 90.0:
+                    elif total_coverage < 90.0:
                         self.coverage_total_summary_label.configure(foreground='blue')
-                    elif coverage < 99.9:
+                    elif total_coverage < 99.9:
                         self.coverage_total_summary_label.configure(foreground='cyan')
                     else:
                         self.coverage_total_summary_label.configure(foreground='green')
