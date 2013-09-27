@@ -76,7 +76,7 @@ class FileView(Treeview):
             index = len([item for item in files if item > dirname])
 
             nodename = self._nodify(dirname)
-            if nodename == self.root:
+            if nodename == self._nodify(self.root):
                 # If this is the CWD, display at the root of the tree.
                 base, path = nodename.rsplit('/', 1)
                 base = ''
