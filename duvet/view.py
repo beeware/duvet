@@ -421,9 +421,6 @@ class MainWindow(object):
                     title='Problem loading coverage data'
                 )
 
-        if not loaded and not retry:
-            self.root.quit()
-
         return loaded
 
     ######################################################
