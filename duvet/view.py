@@ -309,7 +309,7 @@ class MainWindow(object):
         while not loaded and retry:
             try:
                 # Load the new coverage data
-                with open('.coverage') as datafile:
+                with open('.coverage', 'rb') as datafile:
                     self.coverage_data = pickle.load(datafile)
                     self.coverage_data['missing'] = {}
 
