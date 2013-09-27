@@ -4,14 +4,13 @@
 This is the "View" of the MVC world.
 """
 import os
-import pickle
 from Tkinter import *
 from tkFont import *
 from ttk import *
 import tkMessageBox
 import webbrowser
 
-from coverage.parser import CodeParser
+import coverage
 
 from duvet import VERSION, NUM_VERSION
 from duvet.widgets import nodify, CodeView, FileView
@@ -309,14 +308,21 @@ class MainWindow(object):
         while not loaded and retry:
             try:
                 # Load the new coverage data
-                with open('.coverage', 'rb') as datafile:
-                    self.coverage_data = pickle.load(datafile)
-                    self.coverage_data['missing'] = {}
+                cov = coverage.coverage()
+                cov.load()
 
-                    n_total_executed = 0
-                    n_total_missing = 0
+                # Override precision for coverage reporting.
+                coverage.results.Numbers.set_precision(1)
+
+                if cov.data.measured_files():
+                    self.coverage_data = {
+                        'lines': {},
+                        'missing': {},
+                    }
+                    totals = coverage.results.Numbers()
+
                     # Update the coverage display of every file mentioned in the file.
-                    for filename, executed in self.coverage_data['lines'].items():
+                    for filename in cov.data.measured_files():
                         filename = os.path.normcase(filename)
                         node = nodify(filename)
                         dirname, basename = os.path.split(filename)
@@ -331,36 +337,27 @@ class MainWindow(object):
                         # Make sure the file exists on the tree.
                         file_tree.insert_filename(dirname, basename)
 
-                        # file_tree.set(node, 'branch_coverage', str(len(lines)))
-
                         # Compute the coverage percentage
-                        parser = CodeParser(filename=filename)
-                        statements, excluded = parser.parse_source()
-                        exec1 = parser.first_lines(executed)
-                        missing = sorted(set(statements) - set(exec1))
-                        self.coverage_data['missing'][filename] = missing
-                        n_executed = len(executed)
-                        n_missing = len(missing)
+                        analysis = cov._analyze(filename)
 
-                        n_total_executed = n_total_executed + n_executed
-                        n_total_missing = n_total_missing + n_missing
+                        self.coverage_data['lines'][filename] = analysis.statements
+                        self.coverage_data['missing'][filename] = analysis.missing
+                        file_coverage = analysis.numbers.pc_covered
+
+                        totals = totals + analysis.numbers
 
                         # Update the column summary
-                        try:
-                            coverage = round(float(n_executed) / (float(n_executed) + float(n_missing)) * 100, 1)
-                        except ZeroDivisionError:
-                            # If no lines were executed or missing, report as 0.0% coverage.
-                            coverage = 0.0
-                        file_tree.set(node, 'coverage', coverage)
+                        file_tree.set(node, 'coverage', analysis.numbers.pc_covered_str)
+                        # file_tree.set(node, 'branch_coverage', str(len(lines)))
 
                         # Set the color of the tree node based on coverage
-                        if coverage < 70.0:
+                        if file_coverage < 70.0:
                             file_tree.item(node, tags=['file', 'code', 'bad'])
-                        elif coverage < 80.0:
+                        elif file_coverage < 80.0:
                             file_tree.item(node, tags=['file', 'code', 'poor'])
-                        elif coverage < 90.0:
+                        elif file_coverage < 90.0:
                             file_tree.item(node, tags=['file', 'code', 'ok'])
-                        elif coverage < 99.9:
+                        elif file_coverage < 99.9:
                             file_tree.item(node, tags=['file', 'code', 'good'])
                         else:
                             file_tree.item(node, tags=['file', 'code', 'perfect'])
@@ -380,14 +377,10 @@ class MainWindow(object):
                                 file_tree.item(node, tags=['file', 'code'])
 
                     # Compute the overall coverage
-                    try:
-                        total_coverage = round(float(n_total_executed) / (float(n_total_executed) + float(n_total_missing)) * 100, 1)
-                    except ZeroDivisionError:
-                        # If no lines were executed or missing, report as 0.0% coverage.
-                        total_coverage = 0.0
+                    total_coverage = totals.pc_covered
                     self.coverage_data['total_coverage'] = total_coverage
 
-                    coverage_text = u'%.1f%%' % self.coverage_data['total_coverage'],
+                    coverage_text = u'%.1f%%' % total_coverage
 
                     # Update the text with up/down arrows to reflect change
                     if old_total_coverage is not None:
@@ -417,11 +410,11 @@ class MainWindow(object):
                         self.show_file(current_file)
 
                     loaded = True
-            except (IOError, EOFError):
-                retry = tkMessageBox.askretrycancel(
-                    message="Couldn't find coverage data file. Have you generated coverage data? Is the .coverage in your current working directory",
-                    title='No coverage data found'
-                )
+                else:
+                    retry = tkMessageBox.askretrycancel(
+                        message="Couldn't find coverage data file. Have you generated coverage data? Is the .coverage in your current working directory",
+                        title='No coverage data found'
+                    )
             except Exception, e:
                 retry = tkMessageBox.askretrycancel(
                     message="Couldn't load coverage data -- data file may be corrupted (Error was: %s)" % e,
