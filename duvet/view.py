@@ -294,7 +294,11 @@ class MainWindow(object):
                             n_total_missing = n_total_missing + n_missing
 
                             # Update the column summary
-                            coverage = round(float(n_executed) / (float(n_executed) + float(n_missing)) * 100, 1)
+                            try:
+                                coverage = round(float(n_executed) / (float(n_executed) + float(n_missing)) * 100, 1)
+                            except ZeroDivisionError:
+                                # If no lines were executed or missing, report as 0.0% coverage.
+                                coverage = 0.0
                             self.file_tree.set(node, 'coverage', coverage)
 
                             # Set the color of the tree node based on coverage
@@ -324,7 +328,11 @@ class MainWindow(object):
                                 self.file_tree.item(node, tags=['file', 'code'])
 
                     # Compute the overall coverage
-                    total_coverage = round(float(n_total_executed) / (float(n_total_executed) + float(n_total_missing)) * 100, 1)
+                    try:
+                        total_coverage = round(float(n_total_executed) / (float(n_total_executed) + float(n_total_missing)) * 100, 1)
+                    except ZeroDivisionError:
+                        # If no lines were executed or missing, report as 0.0% coverage.
+                        total_coverage = 0.0
                     self.coverage_data['total_coverage'] = total_coverage
 
                     coverage_text = u'%.1f%%' % self.coverage_data['total_coverage'],
@@ -363,9 +371,8 @@ class MainWindow(object):
                     title='No coverage data found'
                 )
             except Exception, e:
-                print type(e), e
                 retry = tkMessageBox.askretrycancel(
-                    message="Couldn't load coverage data -- data file may be corrupted",
+                    message="Couldn't load coverage data -- data file may be corrupted (Error was: %s)" % e,
                     title='Problem loading coverage data'
                 )
 
