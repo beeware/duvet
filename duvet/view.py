@@ -285,8 +285,8 @@ class MainWindow(object):
         if filename != self.code.filename:
             self.code.filename = filename
 
-            missing = self.coverage_data['missing'].get(filename, [])
-            executed = self.coverage_data['lines'].get(filename, [])
+            missing = self.coverage_data['missing'].get(os.path.normcase(filename), [])
+            executed = self.coverage_data['lines'].get(os.path.normcase(filename), [])
 
             n_executed = len(executed)
             n_missing = len(missing)
