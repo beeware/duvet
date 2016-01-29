@@ -48,7 +48,10 @@ class MainWindow(object):
         '''
 
         # Obtain and expand the current working directory.
-        base_path = os.path.abspath(os.getcwd())
+        if options.path:
+            base_path = os.path.abspath(options.path)
+        else:
+            base_path = os.path.abspath(os.getcwd())
         self.base_path = os.path.normcase(base_path)
 
         # Create a filename normalizer based on the CWD.
@@ -475,5 +478,3 @@ class MainWindow(object):
             # Display the file in the code view
             if os.path.isfile(filename):
                 self.show_file(filename=filename)
-
-

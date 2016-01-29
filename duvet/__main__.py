@@ -16,6 +16,11 @@ def main():
         version=VERSION
     )
 
+    parser.add_argument(
+        '-p', '--path',
+        metavar='application_path/',
+        help='The PATH to visualize the code coverage'
+    )
     # parser.add_argument(
     #     'filename',
     #     metavar='script.py',
