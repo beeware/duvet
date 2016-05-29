@@ -458,9 +458,9 @@ class MainWindow(object):
         # If this is a formal release, show the docs for that
         # version. otherwise, just show the head docs.
         if len(NUM_VERSION) == 3:
-            webbrowser.open_new('http://duvet.readthedocs.org/en/v%s/' % VERSION)
+            webbrowser.open_new('https://duvet.readthedocs.io/en/v%s/' % VERSION)
         else:
-            webbrowser.open_new('http://duvet.readthedocs.org/')
+            webbrowser.open_new('https://duvet.readthedocs.io/')
 
     def cmd_beeware_page(self):
         "Show the BeeWare project page"
