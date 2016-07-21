@@ -337,33 +337,37 @@ class MainWindow(object):
                         else:
                             file_tree = self.project_file_tree
 
-                        # Make sure the file exists on the tree.
-                        file_tree.insert_filename(dirname, basename)
+                        try:
+                            # # Make sure the file exists on the tree.
+                            file_tree.insert_filename(dirname, basename)
 
-                        # Compute the coverage percentage
-                        analysis = cov._analyze(filename)
+                            # Compute the coverage percentage
+                            analysis = cov._analyze(filename)
 
-                        self.coverage_data['lines'][filename] = analysis.statements
-                        self.coverage_data['missing'][filename] = analysis.missing
-                        file_coverage = analysis.numbers.pc_covered
+                            self.coverage_data['lines'][filename] = analysis.statements
+                            self.coverage_data['missing'][filename] = analysis.missing
+                            file_coverage = analysis.numbers.pc_covered
 
-                        totals = totals + analysis.numbers
+                            totals = totals + analysis.numbers
 
-                        # Update the column summary
-                        file_tree.set(node, 'coverage', analysis.numbers.pc_covered_str)
-                        # file_tree.set(node, 'branch_coverage', str(len(lines)))
+                            file_tree.set(node, 'coverage', analysis.numbers.pc_covered_str)
+                            # file_tree.set(node, 'branch_coverage', str(len(lines)))
 
-                        # Set the color of the tree node based on coverage
-                        if file_coverage < 70.0:
-                            file_tree.item(node, tags=['file', 'code', 'bad'])
-                        elif file_coverage < 80.0:
-                            file_tree.item(node, tags=['file', 'code', 'poor'])
-                        elif file_coverage < 90.0:
-                            file_tree.item(node, tags=['file', 'code', 'ok'])
-                        elif file_coverage < 99.9:
-                            file_tree.item(node, tags=['file', 'code', 'good'])
-                        else:
-                            file_tree.item(node, tags=['file', 'code', 'perfect'])
+                            # Set the color of the tree node based on coverage
+                            if file_coverage < 70.0:
+                                file_tree.item(node, tags=['file', 'code', 'bad'])
+                            elif file_coverage < 80.0:
+                                file_tree.item(node, tags=['file', 'code', 'poor'])
+                            elif file_coverage < 90.0:
+                                file_tree.item(node, tags=['file', 'code', 'ok'])
+                            elif file_coverage < 99.9:
+                                file_tree.item(node, tags=['file', 'code', 'good'])
+                            else:
+                                file_tree.item(node, tags=['file', 'code', 'perfect'])
+
+                        except coverage.misc.NoSource:
+                            # could mean the file was deleted after running coverage
+                            file_tree.item(node, tags=['bad'])
 
                         # We've updated the file, so we know it isn't stale.
                         try:
@@ -478,3 +482,5 @@ class MainWindow(object):
             # Display the file in the code view
             if os.path.isfile(filename):
                 self.show_file(filename=filename)
+            else:
+                self.code.filename = None
