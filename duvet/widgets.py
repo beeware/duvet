@@ -1,5 +1,8 @@
 import os.path
-from ttk import *
+try:
+    from tkinter.ttk import *
+except ImportError:
+    from ttk import *
 
 from tkreadonly import ReadOnlyCode
 
@@ -48,9 +51,10 @@ class FileView(Treeview):
 
         # Populate the file view
         if self.root:
-            os.path.walk(self.root, self._visitor, None)
+            for dirname, _, file_list in os.walk(self.root):
+                self._visitor(dirname, None, file_list)
 
-    def _visitor(self, data, dirname, filesindir):
+    def _visitor(self, dirname, data, filesindir):
         prune = []
         self.insert_dirname(dirname)
         for filename in filesindir:
