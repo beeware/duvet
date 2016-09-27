@@ -1,21 +1,24 @@
 '''
 This is the main entry point for the Duvet GUI.
 '''
-from Tkinter import *
-import sys
+try:
+    from tkinter import *
+except ImportError:
+    from Tkinter import *
 
-import argparse
+import sys
+from argparse import ArgumentParser
 
 from duvet import VERSION
 from duvet.view import MainWindow
 
 
 def main():
-    parser = argparse.ArgumentParser(
+    parser = ArgumentParser(
+        prog='duvet',
         description='A GUI tool to visualize coverage data.',
-        version=VERSION
     )
-
+    parser.add_argument('--version', action='version', version=VERSION)
     parser.add_argument(
         '-p', '--path',
         metavar='application_path/',

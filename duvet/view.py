@@ -4,11 +4,18 @@
 This is the "View" of the MVC world.
 """
 import os
-from Tkinter import *
-from tkFont import *
-from ttk import *
-import tkMessageBox
 import webbrowser
+
+try:
+    from tkinter import *
+    from tkinter.ttk import *
+    from tkinter.font import *
+    import tkinter.messagebox as tkMessageBox
+except ImportError:
+    from Tkinter import *
+    from tkFont import *
+    from ttk import *
+    import tkMessageBox
 
 import coverage
 
@@ -422,7 +429,7 @@ class MainWindow(object):
                         message="Couldn't find coverage data file. Have you generated coverage data? Is the .coverage in your current working directory",
                         title='No coverage data found'
                     )
-            except Exception, e:
+            except Exception as e:
                 retry = tkMessageBox.askretrycancel(
                     message="Couldn't load coverage data -- data file may be corrupted (Error was: %s)" % e,
                     title='Problem loading coverage data'
