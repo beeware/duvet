@@ -8,13 +8,13 @@ import webbrowser
 
 try:
     from tkinter import *
-    from tkinter.ttk import *
-    from tkinter.font import *
+    from tkinter.ttk import Notebook, Label, PanedWindow, Sizegrip
+    # from tkinter.font import *
     import tkinter.messagebox as tkMessageBox
 except ImportError:
     from Tkinter import *
-    from tkFont import *
-    from ttk import *
+    from ttk import Notebook, Label, PanedWindow, Sizegrip
+    # from tkFont import *
     import tkMessageBox
 
 import coverage
@@ -53,7 +53,6 @@ class MainWindow(object):
         -----------------------------------------------------
 
         '''
-
         # Obtain and expand the current working directory.
         if options.path:
             base_path = os.path.abspath(options.path)
@@ -139,7 +138,13 @@ class MainWindow(object):
 
         # Coverage summary for currently selected file.
         self.coverage_total_summary = StringVar()
-        self.coverage_total_summary_label = Label(self.toolbar, textvariable=self.coverage_total_summary, anchor=E, padding=(5, 0, 5, 0), font=('Helvetica','20'))
+        self.coverage_total_summary_label = Label(
+            self.toolbar,
+            textvariable=self.coverage_total_summary,
+            anchor=E,
+            padding=(5, 0, 5, 0),
+            font=('Helvetica','20')
+        )
         self.coverage_total_summary_label.grid(column=1, row=0, sticky=(W, E))
 
         self.toolbar.columnconfigure(0, weight=0)
@@ -177,7 +182,10 @@ class MainWindow(object):
 
         # The left-hand side frame on the main content area
         # The tabs for the two trees
-        self.tree_notebook = Notebook(self.content, padding=(0, 5, 0, 5))
+        self.tree_notebook = Notebook(
+            self.content,
+            padding=(0, 5, 0, 5)
+        )
         self.content.add(self.tree_notebook)
 
     def _setup_project_file_tree(self):
