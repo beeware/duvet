@@ -154,4 +154,4 @@ class FileView(ttk.Treeview):
         On Windows, this requires escaping, because backslashes
         in object IDs filenames cause problems with Tk.
         """
-        Treeview.selection_set(self, nodify(node))
+        ttk.Treeview.selection_set(self, nodify(node))
