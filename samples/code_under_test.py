@@ -18,7 +18,7 @@ def fully_covered_add(a, b):
 
 def non_fully_covered_add(a, b, condition=False):
     """
-    The difference line in this function will never be executed by a test.
+    The difference line in this function will only be executed if condition is True.
     """
     if condition:
         diff = a - b
