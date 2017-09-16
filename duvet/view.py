@@ -7,14 +7,12 @@ import os
 import webbrowser
 
 try:
-    from tkinter import *
-    from tkinter.ttk import *
-    from tkinter.font import *
+    import tkinter as tk
+    from tkinter.ttk import Notebook, Label, PanedWindow, Sizegrip
     import tkinter.messagebox as tkMessageBox
 except ImportError:
-    from Tkinter import *
-    from tkFont import *
-    from ttk import *
+    import Tkinter as tk
+    from ttk import Notebook, Label, PanedWindow, Sizegrip
     import tkMessageBox
 
 import coverage
@@ -53,7 +51,6 @@ class MainWindow(object):
         -----------------------------------------------------
 
         '''
-
         # Obtain and expand the current working directory.
         if options.path:
             base_path = os.path.abspath(options.path)
@@ -73,7 +70,7 @@ class MainWindow(object):
         self.root.geometry('1024x768')
 
         # Prevent the menus from having the empty tearoff entry
-        self.root.option_add('*tearOff', FALSE)
+        self.root.option_add('*tearOff', tk.FALSE)
         # Catch the close button
         self.root.protocol("WM_DELETE_WINDOW", self.cmd_quit)
         # Catch the "quit" event.
@@ -99,15 +96,15 @@ class MainWindow(object):
 
     def _setup_menubar(self):
         # Menubar
-        self.menubar = Menu(self.root)
+        self.menubar = tk.Menu(self.root)
 
         # self.menu_Apple = Menu(self.menubar, name='Apple')
         # self.menubar.add_cascade(menu=self.menu_Apple)
 
-        self.menu_file = Menu(self.menubar)
+        self.menu_file = tk.Menu(self.menubar)
         self.menubar.add_cascade(menu=self.menu_file, label='File')
 
-        self.menu_help = Menu(self.menubar)
+        self.menu_help = tk.Menu(self.menubar)
         self.menubar.add_cascade(menu=self.menu_help, label='Help')
 
         # self.menu_Apple.add_command(label='Test', command=self.cmd_dummy)
@@ -130,17 +127,23 @@ class MainWindow(object):
         '''
 
         # Main toolbar
-        self.toolbar = Frame(self.root)
-        self.toolbar.grid(column=0, row=0, sticky=(W, E))
+        self.toolbar = tk.Frame(self.root)
+        self.toolbar.grid(column=0, row=0, sticky=(tk.W, tk.E))
 
         # Buttons on the toolbar
-        self.refresh_button = Button(self.toolbar, text='Refresh', command=self.cmd_refresh)
+        self.refresh_button = tk.Button(self.toolbar, text='Refresh', command=self.cmd_refresh)
         self.refresh_button.grid(column=0, row=0)
 
         # Coverage summary for currently selected file.
-        self.coverage_total_summary = StringVar()
-        self.coverage_total_summary_label = Label(self.toolbar, textvariable=self.coverage_total_summary, anchor=E, padding=(5, 0, 5, 0), font=('Helvetica','20'))
-        self.coverage_total_summary_label.grid(column=1, row=0, sticky=(W, E))
+        self.coverage_total_summary = tk.StringVar()
+        self.coverage_total_summary_label = Label(
+            self.toolbar,
+            textvariable=self.coverage_total_summary,
+            anchor=tk.E,
+            padding=(5, 0, 5, 0),
+            font=('Helvetica','20')
+        )
+        self.coverage_total_summary_label.grid(column=1, row=0, sticky=(tk.W, tk.E))
 
         self.toolbar.columnconfigure(0, weight=0)
         self.toolbar.columnconfigure(1, weight=1)
@@ -152,8 +155,8 @@ class MainWindow(object):
         '''
 
         # Main content area
-        self.content = PanedWindow(self.root, orient=HORIZONTAL)
-        self.content.grid(column=0, row=1, sticky=(N, S, E, W))
+        self.content = PanedWindow(self.root, orient=tk.HORIZONTAL)
+        self.content.grid(column=0, row=1, sticky=(tk.N, tk.S, tk.E, tk.W))
 
         # Create the tree/control area on the left frame
         self._setup_left_frame()
@@ -177,21 +180,24 @@ class MainWindow(object):
 
         # The left-hand side frame on the main content area
         # The tabs for the two trees
-        self.tree_notebook = Notebook(self.content, padding=(0, 5, 0, 5))
+        self.tree_notebook = Notebook(
+            self.content,
+            padding=(0, 5, 0, 5)
+        )
         self.content.add(self.tree_notebook)
 
     def _setup_project_file_tree(self):
 
-        self.project_file_tree_frame = Frame(self.content)
-        self.project_file_tree_frame.grid(column=0, row=0, sticky=(N, S, E, W))
+        self.project_file_tree_frame = tk.Frame(self.content)
+        self.project_file_tree_frame.grid(column=0, row=0, sticky=(tk.N, tk.S, tk.E, tk.W))
         self.tree_notebook.add(self.project_file_tree_frame, text='Project')
 
         self.project_file_tree = FileView(self.project_file_tree_frame, normalizer=self.filename_normalizer, root=self.base_path)
-        self.project_file_tree.grid(column=0, row=0, sticky=(N, S, E, W))
+        self.project_file_tree.grid(column=0, row=0, sticky=(tk.N, tk.S, tk.E, tk.W))
 
         # # The tree's vertical scrollbar
-        self.project_file_tree_scrollbar = Scrollbar(self.project_file_tree_frame, orient=VERTICAL)
-        self.project_file_tree_scrollbar.grid(column=1, row=0, sticky=(N, S))
+        self.project_file_tree_scrollbar = tk.Scrollbar(self.project_file_tree_frame, orient=tk.VERTICAL)
+        self.project_file_tree_scrollbar.grid(column=1, row=0, sticky=(tk.N, tk.S))
 
         # # Tie the scrollbar to the text views, and the text views
         # # to each other.
@@ -208,16 +214,16 @@ class MainWindow(object):
 
     def _setup_global_file_tree(self):
 
-        self.global_file_tree_frame = Frame(self.content)
-        self.global_file_tree_frame.grid(column=0, row=0, sticky=(N, S, E, W))
+        self.global_file_tree_frame = tk.Frame(self.content)
+        self.global_file_tree_frame.grid(column=0, row=0, sticky=(tk.N, tk.S, tk.E, tk.W))
         self.tree_notebook.add(self.global_file_tree_frame, text='Global')
 
         self.global_file_tree = FileView(self.global_file_tree_frame, normalizer=self.filename_normalizer)
-        self.global_file_tree.grid(column=0, row=0, sticky=(N, S, E, W))
+        self.global_file_tree.grid(column=0, row=0, sticky=(tk.N, tk.S, tk.E, tk.W))
 
         # # The tree's vertical scrollbar
-        self.global_file_tree_scrollbar = Scrollbar(self.global_file_tree_frame, orient=VERTICAL)
-        self.global_file_tree_scrollbar.grid(column=1, row=0, sticky=(N, S))
+        self.global_file_tree_scrollbar = tk.Scrollbar(self.global_file_tree_frame, orient=tk.VERTICAL)
+        self.global_file_tree_scrollbar.grid(column=1, row=0, sticky=(tk.N, tk.S))
 
         # # Tie the scrollbar to the text views, and the text views
         # # to each other.
@@ -233,17 +239,17 @@ class MainWindow(object):
         self.global_file_tree.bind('<<TreeviewSelect>>', self.on_file_selected)
 
     def _setup_code_area(self):
-        self.code_frame = Frame(self.content)
-        self.code_frame.grid(column=1, row=0, sticky=(N, S, E, W))
+        self.code_frame = tk.Frame(self.content)
+        self.code_frame.grid(column=1, row=0, sticky=(tk.N, tk.S, tk.E, tk.W))
 
         # Label for current file
-        self.current_file = StringVar()
+        self.current_file = tk.StringVar()
         self.current_file_label = Label(self.code_frame, textvariable=self.current_file)
-        self.current_file_label.grid(column=0, row=0, sticky=(W, E))
+        self.current_file_label.grid(column=0, row=0, sticky=(tk.W, tk.E))
 
         # Code display area
         self.code = CodeView(self.code_frame)
-        self.code.grid(column=0, row=1, sticky=(N, S, E, W))
+        self.code.grid(column=0, row=1, sticky=(tk.N, tk.S, tk.E, tk.W))
 
         # Set up weights for the code frame's content
         self.code_frame.columnconfigure(0, weight=1)
@@ -254,18 +260,18 @@ class MainWindow(object):
 
     def _setup_status_bar(self):
         # Status bar
-        self.statusbar = Frame(self.root)
-        self.statusbar.grid(column=0, row=2, sticky=(W, E))
+        self.statusbar = tk.Frame(self.root)
+        self.statusbar.grid(column=0, row=2, sticky=(tk.W, tk.E))
 
         # Coverage summary for currently selected file.
-        self.coverage_file_summary = StringVar()
+        self.coverage_file_summary = tk.StringVar()
         self.coverage_file_summary_label = Label(self.statusbar, textvariable=self.coverage_file_summary)
-        self.coverage_file_summary_label.grid(column=0, row=0, sticky=(W, E))
+        self.coverage_file_summary_label.grid(column=0, row=0, sticky=(tk.W, tk.E))
         self.coverage_file_summary.set('No file selected')
 
         # Main window resize handle
         self.grip = Sizegrip(self.statusbar)
-        self.grip.grid(column=1, row=0, sticky=(S, E))
+        self.grip.grid(column=1, row=0, sticky=(tk.S, tk.E))
 
         # Set up weights for status bar frame
         self.statusbar.columnconfigure(0, weight=1)

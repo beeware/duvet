@@ -1,8 +1,8 @@
 import os.path
 try:
-    from tkinter.ttk import *
+    from tkinter import ttk
 except ImportError:
-    from ttk import *
+    import ttk
 
 from tkreadonly import ReadOnlyCode
 
@@ -23,13 +23,13 @@ class CodeView(ReadOnlyCode):
                 '%s.0' % (line + 1)
             )
 
-class FileView(Treeview):
+class FileView(ttk.Treeview):
     def __init__(self, *args, **kwargs):
         # Only a single stack frame can be selected at a time.
         kwargs['selectmode'] = 'browse'
         self.normalizer = kwargs.pop('normalizer')
         self.root = kwargs.pop('root', None)
-        Treeview.__init__(self, *args, **kwargs)
+        ttk.Treeview.__init__(self, *args, **kwargs)
 
         # self['columns'] = ('coverage', 'branch_coverage')
         self['columns'] = ('coverage',)
@@ -154,4 +154,4 @@ class FileView(Treeview):
         On Windows, this requires escaping, because backslashes
         in object IDs filenames cause problems with Tk.
         """
-        Treeview.selection_set(self, nodify(node))
+        ttk.Treeview.selection_set(self, nodify(node))
