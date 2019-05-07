@@ -1,6 +1,6 @@
-.. image:: http://pybee.org/project/projects/tools/duvet/duvet.png
+.. image:: https://beeware.org/project/projects/tools/duvet/duvet.png
     :width: 72px
-    :target: https://pybee.org/duvet
+    :target: https://beeware.org/duvet
 
 Duvet
 =====
