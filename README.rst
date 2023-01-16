@@ -15,13 +15,15 @@ Duvet
     :target: https://pypi.python.org/pypi/duvet
 
 .. image:: https://img.shields.io/pypi/l/duvet.svg
-    :target: https://github.com/pybee/duvet/blob/master/LICENSE
+    :target: https://github.com/pybee/duvet/blob/main/LICENSE
 
-.. image:: https://travis-ci.org/pybee/duvet.svg?branch=master
-    :target: https://travis-ci.org/pybee/duvet
+.. image:: https://github.com/beeware/duvet/workflows/CI/badge.svg?branch=main
+   :target: https://github.com/beeware/duvet/actions
+   :alt: Build Status
 
-.. image:: https://badges.gitter.im/pybee/general.svg
-    :target: https://gitter.im/pybee/general
+.. image:: https://img.shields.io/discord/836455665257021440?label=Discord%20Chat&logo=discord&style=plastic
+   :target: https://beeware.org/bee/chat/
+   :alt: Discord server
 
 Duvet is a GUI tool for visualizing code coverage results produced by
 `coverage.py`_.
@@ -83,7 +85,7 @@ Duvet is part of the `BeeWare suite`_. You can talk to the community through:
 
 * `@pybeeware on Twitter`_
 
-* The `pybee/general`_ channel on Gitter.
+* `Discord <https://beeware.org/bee/chat/>`__
 
 We foster a welcoming and respectful community as described in our
 `BeeWare Community Code of Conduct`_.
@@ -94,11 +96,10 @@ Contributing
 If you experience problems with Duvet, `log them on GitHub`_. If you
 want to contribute code, please `fork the code`_ and `submit a pull request`_.
 
-.. _BeeWare suite: http://pybee.org
+.. _BeeWare suite: https://beeware.org
 .. _Read The Docs: https://duvet.readthedocs.io
 .. _@pybeeware on Twitter: https://twitter.com/pybeeware
-.. _pybee/general: https://gitter.im/pybee/general
-.. _BeeWare Community Code of Conduct: http://pybee.org/community/behavior/
-.. _log them on Github: https://github.com/pybee/duvet/issues
-.. _fork the code: https://github.com/pybee/duvet
-.. _submit a pull request: https://github.com/pybee/duvet/pulls
+.. _BeeWare Community Code of Conduct: https://beeware.org/community/behavior/
+.. _log them on Github: https://github.com/beeware/duvet/issues
+.. _fork the code: https://github.com/beeware/duvet
+.. _submit a pull request: https://github.com/beeware/duvet/pulls
