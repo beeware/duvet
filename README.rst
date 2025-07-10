@@ -52,7 +52,7 @@ Problems under Ubuntu
 ~~~~~~~~~~~~~~~~~~~~~
 
 Ubuntu's packaging of Python omits the ``idlelib`` library from it's
-base packge. If you're using Python 2.7 on Ubuntu 13.04, you can install
+base package. If you're using Python 2.7 on Ubuntu 13.04, you can install
 ``idlelib`` by running::
 
     $ sudo apt-get install idle-python2.7
@@ -76,30 +76,24 @@ virtualenv is activated.
 Documentation
 -------------
 
-Documentation for Duvet can be found on `Read The Docs`_.
+Documentation for Duvet can be found on `Read The Docs <https://duvet.readthedocs.io>`__.
 
 Community
 ---------
 
-Duvet is part of the `BeeWare suite`_. You can talk to the community through:
+Duvet is part of the `BeeWare suite <https://beeware.org>`__. You can talk to the
+community through:
 
-* `@pybeeware on Twitter`_
+* `@beeware@fosstodon.org on Mastodon <https://fosstodon.org/@beeware>`__
 
 * `Discord <https://beeware.org/bee/chat/>`__
 
-We foster a welcoming and respectful community as described in our
-`BeeWare Community Code of Conduct`_.
+We foster a welcoming and respectful community as described in our `BeeWare Community
+Code of Conduct <https://beeware.org/community/behavior/>`__.
 
 Contributing
 ------------
 
-If you experience problems with Duvet, `log them on GitHub`_. If you
-want to contribute code, please `fork the code`_ and `submit a pull request`_.
+If you experience problems with Duvet, `log them on GitHub <https://github.com/beeware/duvet/issues>`__. 
 
-.. _BeeWare suite: https://beeware.org
-.. _Read The Docs: https://duvet.readthedocs.io
-.. _@pybeeware on Twitter: https://twitter.com/pybeeware
-.. _BeeWare Community Code of Conduct: https://beeware.org/community/behavior/
-.. _log them on Github: https://github.com/beeware/duvet/issues
-.. _fork the code: https://github.com/beeware/duvet
-.. _submit a pull request: https://github.com/beeware/duvet/pulls
+If you want to contribute, please `fork the project <https://github.com/beeware/duvet>`__ and `submit a pull request <https://github.com/beeware/duvet/pulls>`__.
